@@ -1,7 +1,12 @@
 package com.task_master.task_management.model;
+
 import jakarta.persistence.*;
-import lombok.*;
+import jakarta.validation.constraints.NotBlank;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 import java.time.LocalDate;
+import java.util.Set;
 
 @Entity
 @Table(name = "tasks")
@@ -14,6 +19,7 @@ public class Task {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @NotBlank(message = "Title is required")
     @Column(nullable = false)
     private String title;
 
@@ -31,4 +37,10 @@ public class Task {
     @ManyToOne
     @JoinColumn(name = "project_id")
     private Project project;
+
+    @Enumerated(EnumType.STRING)
+    private TaskStatus status;
+
+    @OneToMany(mappedBy = "task")
+    private Set<Comment> comments; // Adding Set<Comment> to match constructor
 }

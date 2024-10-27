@@ -6,7 +6,7 @@ services:
     environment:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: root123
-      POSTGRES_DB: your_database
+      POSTGRES_DB: anand
     ports:
       - "5434:5432"
     volumes:

@@ -1,53 +1,38 @@
 package com.task_master.task_management.controller;
 
 import com.task_master.task_management.model.Team;
-import com.task_master.task_management.service.TeamService;
+import com.task_master.task_management.model.User;
+import com.task_master.task_management.repository.TeamRepository;
+import com.task_master.task_management.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
 import java.util.Optional;
 
 @RestController
 @RequestMapping("/api/teams")
 public class TeamController {
 
-    private final TeamService teamService;
+    @Autowired
+    private TeamRepository teamRepository;
 
     @Autowired
-    public TeamController(TeamService teamService) {
-        this.teamService = teamService;
-    }
+    private UserRepository userRepository;
 
-    @PostMapping
-    public ResponseEntity<Team> createTeam(@RequestBody Team team) {
-        Team createdTeam = teamService.createTeam(team);
-        return new ResponseEntity<>(createdTeam, HttpStatus.CREATED);
-    }
+    @PostMapping("/{teamId}/addUser/{userId}")
+    public ResponseEntity<String> addUserToTeam(@PathVariable Long teamId, @PathVariable Long userId) {
+        Optional<Team> teamOpt = teamRepository.findById(teamId);
+        Optional<User> userOpt = userRepository.findById(userId);
 
-    @GetMapping("/{id}")
-    public ResponseEntity<Team> getTeamById(@PathVariable Long id) {
-        Optional<Team> team = teamService.getTeamById(id);
-        return team.map(ResponseEntity::ok)
-                .orElseGet(() -> ResponseEntity.status(HttpStatus.NOT_FOUND).build());
-    }
-
-    @GetMapping
-    public List<Team> getAllTeams() {
-        return teamService.getAllTeams();
-    }
-
-    @PutMapping("/{id}")
-    public ResponseEntity<Team> updateTeam(@PathVariable Long id, @RequestBody Team teamDetails) {
-        Team updatedTeam = teamService.updateTeam(id, teamDetails);
-        return ResponseEntity.ok(updatedTeam);
-    }
-
-    @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteTeam(@PathVariable Long id) {
-        teamService.deleteTeam(id);
-        return ResponseEntity.noContent().build();
+        if (teamOpt.isPresent() && userOpt.isPresent()) {
+            Team team = teamOpt.get();
+            User user = userOpt.get();
+            team.getMembers().add(user);
+            teamRepository.save(team);
+            return ResponseEntity.ok("User added to team");
+        } else {
+            return ResponseEntity.notFound().build();
+        }
     }
 }

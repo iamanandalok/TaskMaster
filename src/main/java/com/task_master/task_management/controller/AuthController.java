@@ -27,14 +27,12 @@ public class AuthController {
     @Autowired
     private UserService userService;
 
-    // Register new user
     @PostMapping("/register")
     public ResponseEntity<String> registerUser(@RequestBody User user) {
-        userService.createUser(user);  // Uses the UserService to save a new user
+        userService.createUser(user);
         return ResponseEntity.status(HttpStatus.CREATED).body("User registered successfully");
     }
 
-    // Login existing user
     @PostMapping("/login")
     public ResponseEntity<JwtResponse> login(@RequestBody LoginRequest loginRequest) {
         Authentication authentication = authenticationManager.authenticate(

@@ -1,7 +1,10 @@
 package com.task_master.task_management.model;
 
 import jakarta.persistence.*;
-import lombok.*;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+
 import java.util.Set;
 
 @Entity
@@ -18,12 +21,18 @@ public class Project {
     @Column(nullable = false)
     private String name;
 
+    @Column(nullable = false)
     private String description;
 
-    @OneToMany(mappedBy = "project")
-    private Set<Task> tasks;
+    @ManyToMany
+    @JoinTable(
+            name = "project_members",
+            joinColumns = @JoinColumn(name = "project_id"),
+            inverseJoinColumns = @JoinColumn(name = "user_id")
+    )
+    private Set<User> members;
 
     @ManyToOne
-    @JoinColumn(name = "team_id")
+    @JoinColumn(name = "team_id", nullable = false)
     private Team team;
 }

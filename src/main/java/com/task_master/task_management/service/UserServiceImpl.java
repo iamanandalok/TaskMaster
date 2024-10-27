@@ -5,6 +5,7 @@ import com.task_master.task_management.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+
 import java.util.List;
 import java.util.Optional;
 
@@ -19,13 +20,18 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public User createUser(User user) {
-        user.setPassword(passwordEncoder.encode(user.getPassword()));  // Hashing the password
+        user.setPassword(passwordEncoder.encode(user.getPassword()));
         return userRepository.save(user);
     }
 
     @Override
     public Optional<User> getUserById(Long id) {
         return userRepository.findById(id);
+    }
+
+    @Override
+    public Optional<User> getUserByUsername(String username) {
+        return userRepository.findByUsername(username); // Assuming this method exists in your UserRepository
     }
 
     @Override
@@ -41,7 +47,7 @@ public class UserServiceImpl implements UserService {
             updatedUser.setUsername(user.getUsername());
             updatedUser.setEmail(user.getEmail());
             if (user.getPassword() != null && !user.getPassword().isEmpty()) {
-                updatedUser.setPassword(passwordEncoder.encode(user.getPassword()));  // Re-hash if password changes
+                updatedUser.setPassword(passwordEncoder.encode(user.getPassword()));
             }
             return userRepository.save(updatedUser);
         } else {

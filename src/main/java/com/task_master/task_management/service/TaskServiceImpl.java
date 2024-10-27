@@ -4,19 +4,14 @@ import com.task_master.task_management.model.Task;
 import com.task_master.task_management.repository.TaskRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-
 import java.util.List;
 import java.util.Optional;
 
 @Service
 public class TaskServiceImpl implements TaskService {
 
-    private final TaskRepository taskRepository;
-
     @Autowired
-    public TaskServiceImpl(TaskRepository taskRepository) {
-        this.taskRepository = taskRepository;
-    }
+    private TaskRepository taskRepository;
 
     @Override
     public Task createTask(Task task) {
@@ -34,24 +29,43 @@ public class TaskServiceImpl implements TaskService {
     }
 
     @Override
-    public Task updateTask(Long id, Task taskDetails) {
-        return taskRepository.findById(id)
-                .map(existingTask -> {
-                    existingTask.setTitle(taskDetails.getTitle());
-                    existingTask.setDescription(taskDetails.getDescription());
-                    existingTask.setDueDate(taskDetails.getDueDate());
-                    existingTask.setCompleted(taskDetails.isCompleted());
-                    return taskRepository.save(existingTask);
-                })
-                .orElseThrow(() -> new RuntimeException("Task not found with id " + id));
+    public Task updateTask(Long id, Task task) {
+        Optional<Task> existingTask = taskRepository.findById(id);
+        if (existingTask.isPresent()) {
+            Task updatedTask = existingTask.get();
+            updatedTask.setTitle(task.getTitle());
+            updatedTask.setDescription(task.getDescription());
+            updatedTask.setDueDate(task.getDueDate());
+            updatedTask.setCompleted(task.isCompleted());
+            return taskRepository.save(updatedTask);
+        } else {
+            throw new RuntimeException("Task not found with id " + id);
+        }
     }
 
     @Override
     public void deleteTask(Long id) {
-        if (taskRepository.existsById(id)) {
-            taskRepository.deleteById(id);
-        } else {
-            throw new RuntimeException("Task not found with id " + id);
-        }
+        taskRepository.deleteById(id);
+    }
+
+    // Implementing the new methods
+    @Override
+    public List<Task> getTasksByStatus(boolean completed) {
+        return taskRepository.findByCompleted(completed);
+    }
+
+    @Override
+    public List<Task> getTasksByKeyword(String keyword) {
+        return taskRepository.findByTitleContainingIgnoreCase(keyword);
+    }
+
+    @Override
+    public List<Task> getTasksBetweenDates(java.time.LocalDate startDate, java.time.LocalDate endDate) {
+        return taskRepository.findByDueDateBetween(startDate, endDate);
+    }
+
+    @Override
+    public List<Task> getTasksByUserId(Long userId) {
+        return taskRepository.findTasksByUserId(userId);
     }
 }
